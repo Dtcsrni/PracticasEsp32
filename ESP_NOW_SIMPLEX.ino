@@ -1,38 +1,46 @@
 #include <esp_now.h>
 #include <WiFi.h>
+
 // REPLACE WITH YOUR RECEIVER MAC Address
-uint8_t MAC_RECEPTOR[] = {0xCC,0xDB,0xA7,0x69,0x0D,0xD4};
+uint8_t MAC_Receptor[] = {0xEC,0x62,0x60,0x1E,0xBE,0x7C};
+
 // Structure example to send data
 // Must match the receiver structure
 typedef struct estructura_mensaje {
   int mensaje;
+
 } estructura_mensaje;
+
 // Create a struct_message called myData
 estructura_mensaje misDatos;
+
 esp_now_peer_info_t infoCompanero;
+
 // callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.println("Ultimo mensaje enviado:");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Envio correcto" : "Envio erroneo");
+  Serial.print("\r\nEstatus de último mensaje:\t");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Mensaje entregado" : "Fallo al entregar mensaje");
 }
  
 void setup() {
   // Init Serial Monitor
   Serial.begin(115200);
+ 
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
   // Init ESP-NOW
   if (esp_now_init() != ESP_OK) {
-    Serial.println("Error inicializando ESP NOW");
+    Serial.println("Error al inicializar ESP NOW");
     return;
   }
+
   // Once ESPNow is successfully Init, we will register for Send CB to
   // get the status of Trasnmitted packet
   esp_now_register_send_cb(OnDataSent);
   
   // Register peer
-  memcpy(infoCompanero.peer_addr, MAC_RECEPTOR, 6);
+  memcpy(infoCompanero.peer_addr, MAC_Receptor, 6);
   infoCompanero.channel = 0;  
   infoCompanero.encrypt = false;
   
@@ -46,16 +54,16 @@ void setup() {
 void loop() {
   // Set values to send
 
-  misDatos.mensaje = 2023;
+  misDatos.mensaje = false;
   
   // Send message via ESP-NOW
-  esp_err_t resultado = esp_now_send(MAC_RECEPTOR, (uint8_t *) &misDatos, sizeof(misDatos));
+  esp_err_t result = esp_now_send(MAC_Receptor, (uint8_t *) &misDatos, sizeof(misDatos));
    
-  if (resultado == ESP_OK) {
-    Serial.println("Envío correcto");
+  if (result == ESP_OK) {
+    Serial.println("Envíado correctamente");
   }
   else {
-    Serial.println("Error enviando datos");
+    Serial.println("Error al enviar datos");
   }
   delay(2000);
 }

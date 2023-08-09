@@ -1,68 +1,66 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
-// REPLACE WITH YOUR RECEIVER MAC Address
-uint8_t MAC_Receptor[] = {0xEC,0x62,0x60,0x1E,0xBE,0x7C};
+// REEMPLAZAR CON LA DIRECCIÓN MAC DE TU RECEPTOR
+uint8_t MAC_Receptor[] = {0xEC, 0x62, 0x60, 0x1E, 0xBE, 0x7C};
 
-// Structure example to send data
-// Must match the receiver structure
+// Ejemplo de estructura para enviar datos
+// Debe coincidir con la estructura del receptor
 typedef struct estructura_mensaje {
   int mensaje;
-
 } estructura_mensaje;
 
-// Create a struct_message called myData
+// Crear una estructura estructura_mensaje llamada misDatos
 estructura_mensaje misDatos;
 
 esp_now_peer_info_t infoCompanero;
 
-// callback when data is sent
+// Callback cuando se envían datos
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.print("\r\nEstatus de último mensaje:\t");
+  Serial.print("\r\nEstado del último mensaje:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Mensaje entregado" : "Fallo al entregar mensaje");
 }
- 
+
 void setup() {
-  // Init Serial Monitor
+  // Iniciar el Monitor Serial
   Serial.begin(115200);
- 
-  // Set device as a Wi-Fi Station
+
+  // Configurar el dispositivo como una Estación Wi-Fi
   WiFi.mode(WIFI_STA);
 
-  // Init ESP-NOW
+  // Inicializar ESP-NOW
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error al inicializar ESP NOW");
     return;
   }
 
-  // Once ESPNow is successfully Init, we will register for Send CB to
-  // get the status of Trasnmitted packet
+  // Una vez que ESPNow se ha inicializado correctamente, nos registraremos para recibir la confirmación
+  // del estado del paquete transmitido
   esp_now_register_send_cb(OnDataSent);
-  
-  // Register peer
+
+  // Registrar compañero
   memcpy(infoCompanero.peer_addr, MAC_Receptor, 6);
-  infoCompanero.channel = 0;  
+  infoCompanero.channel = 0;
   infoCompanero.encrypt = false;
-  
-  // Add peer        
-  if (esp_now_add_peer(&infoCompanero) != ESP_OK){
-    Serial.println("Fallo al agregar companero");
+
+  // Agregar compañero
+  if (esp_now_add_peer(&infoCompanero) != ESP_OK) {
+    Serial.println("Fallo al agregar compañero");
     return;
   }
 }
- 
+
 void loop() {
-  // Set values to send
+  // Establecer valores para enviar
 
   misDatos.mensaje = false;
-  
-  // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(MAC_Receptor, (uint8_t *) &misDatos, sizeof(misDatos));
-   
+
+  // Enviar mensaje a través de ESP-NOW
+  esp_err_t result = esp_now_send(MAC_Receptor, (uint8_t *)&misDatos, sizeof(misDatos));
+
   if (result == ESP_OK) {
-    Serial.println("Envíado correctamente");
-  }
-  else {
+    Serial.println("Enviado correctamente");
+  } else {
     Serial.println("Error al enviar datos");
   }
   delay(2000);

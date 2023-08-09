@@ -7,7 +7,8 @@ uint8_t MAC_Receptor[] = {0xEC, 0x62, 0x60, 0x1E, 0xBE, 0x7C};
 // Ejemplo de estructura para enviar datos
 // Debe coincidir con la estructura del receptor
 typedef struct estructura_mensaje {
-  int mensaje;
+  int numero;
+   char mensaje[32];
 } estructura_mensaje;
 
 // Crear una estructura estructura_mensaje llamada misDatos
@@ -53,7 +54,8 @@ void setup() {
 void loop() {
   // Establecer valores para enviar
 
-  misDatos.mensaje = false;
+  misDatos.numero = 10;
+  strcpy(misDatos.mensaje, "La calificación es: ");
 
   // Enviar mensaje a través de ESP-NOW
   esp_err_t result = esp_now_send(MAC_Receptor, (uint8_t *)&misDatos, sizeof(misDatos));
